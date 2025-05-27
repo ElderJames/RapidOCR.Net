@@ -5,6 +5,17 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+	
+		<!-- NuGet Package Information -->
+		<PackageId>RapidOCR.Net</PackageId>
+		<Authors>BobLd;ElderJames</Authors>
+		<Description>RapidOCR implementation for .NET - Cross-platform OCR processing using PaddleOCR ONNX models. Based on RapidAI's RapidOCR</Description>
+		<PackageTags>ocr;paddleocr;rapidocr;text-recognition;text-detection</PackageTags>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/ElderJames/RapidOCR.Net</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/ElderJames/RapidOCR.Net</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -13,6 +24,10 @@
 		<PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.18.1" />
 		<PackageReference Include="SkiaSharp" Version="2.88.8" />
 		<PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../README.md" Pack="true" PackagePath="/" />
 	</ItemGroup>
 
 	<ItemGroup>

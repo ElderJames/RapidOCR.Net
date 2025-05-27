@@ -3,6 +3,20 @@ Cross-platform OCR processing library using PaddleOCR ONNX models, and based on 
 
 The code was optimised to remove dependencies on `System.Drawing` and `OpenCV`. The image processing is now done only using `SkiaSharp` and `PContourNet`.
 
+> **Note**: This is a fork of the original [RapidOcrNet](https://github.com/BobLd/RapidOcrNet) repository and the NuGet package is independently published. It is not an official release from the RapidOCR team.
+
+## Installation
+
+Install via NuGet Package Manager:
+```
+dotnet add package RapidOCR.Net
+```
+
+Or via Package Manager Console:
+```
+Install-Package RapidOCR.Net
+```
+
 ## Usage
 ```csharp
 string targetImg = "image.png";

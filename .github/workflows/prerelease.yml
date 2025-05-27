@@ -1,0 +1,66 @@
+name: Publish Preview Package
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.editorconfig'
+
+jobs:
+  build-and-publish-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: |
+          6.0.x
+          7.0.x
+          9.0.x
+    
+    - name: Set Preview Version
+      run: |
+        # 获取最新的标签版本，如果没有则使用 0.1.0
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
+        
+        # 移除v前缀
+        BASE_VERSION=${LATEST_TAG#v}
+        
+        # 根据分支生成预发布标签
+        if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          PREVIEW_VERSION="$BASE_VERSION-alpha.${{ github.run_number }}"
+        elif [[ "${{ github.ref }}" == "refs/heads/master" || "${{ github.ref }}" == "refs/heads/main" ]]; then
+          PREVIEW_VERSION="$BASE_VERSION-beta.${{ github.run_number }}"
+        else
+          PREVIEW_VERSION="$BASE_VERSION-preview.${{ github.run_number }}"
+        fi
+        
+        echo "Generated version: $PREVIEW_VERSION"
+        echo "PREVIEW_VERSION=$PREVIEW_VERSION" >> $GITHUB_ENV
+    
+    - name: Restore dependencies
+      run: dotnet restore RapidOcrNet/RapidOcrNet.csproj
+    
+    - name: Build
+      run: dotnet build RapidOcrNet/RapidOcrNet.csproj --no-restore --configuration Release /p:Version=${PREVIEW_VERSION}
+    
+    - name: Test
+      run: dotnet test RapidOcrNet/RapidOcrNet.csproj --no-build --configuration Release --verbosity normal
+    
+    - name: Pack
+      run: dotnet pack RapidOcrNet/RapidOcrNet.csproj --no-build --configuration Release /p:Version=${PREVIEW_VERSION} --output nupkgs
+    
+    - name: Setup NuGet Source
+      run: |
+        dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+    
+    - name: Push to GitHub Packages
+      run: dotnet nuget push "./nupkgs/*.nupkg" --source github --skip-duplicate
